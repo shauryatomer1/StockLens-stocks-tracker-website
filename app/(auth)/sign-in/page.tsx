@@ -4,11 +4,10 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import InputField from '@/components/forms/InputField';
 import FooterLink from '@/components/forms/FooterLink';
-// Import only signUpWithEmail, removing signInWithEmail
-// import { signUpWithEmail } from "@/lib/actions/auth.actions";
-import { toast } from "sonner";
-// import { signInEmail } from "better-auth/api";
-import { useRouter } from "next/navigation";
+import {signInWithEmail, signUpWithEmail} from "@/lib/actions/auth.actions";
+import {toast} from "sonner";
+import {signInEmail} from "better-auth/api";
+import {useRouter} from "next/navigation";
 
 const SignIn = () => {
     const router = useRouter()
@@ -25,7 +24,6 @@ const SignIn = () => {
     });
 
     const onSubmit = async (data: SignInFormData) => {
-        /*
         try {
             const result = await signInWithEmail(data);
             if(result.success) router.push('/');
@@ -35,13 +33,6 @@ const SignIn = () => {
                 description: e instanceof Error ? e.message : 'Failed to sign in.'
             })
         }
-        */
-
-        // Placeholder logic
-        console.log("Form would be submitted with:", data);
-        toast.info("Sign in logic is currently disabled.");
-        // You can add a test redirect if you want
-        // router.push('/'); 
     }
 
     return (
@@ -52,7 +43,7 @@ const SignIn = () => {
                 <InputField
                     name="email"
                     label="Email"
-                    placeholder="contact@shauryatomar1@gmail.com"
+                    placeholder="contact@jsmastery.com"
                     register={register}
                     error={errors.email}
                     validation={{ required: 'Email is required', pattern: /^\w+@\w+\.\w+$/ }}
