@@ -7,7 +7,7 @@ import SelectField from "@/components/forms/SelectField";
 import { INVESTMENT_GOALS, PREFERRED_INDUSTRIES, RISK_TOLERANCE_OPTIONS } from "@/lib/constants";
 import { CountrySelectField } from "@/components/forms/CountrySelectField";
 import FooterLink from "@/components/forms/FooterLink";
-// import { signUpWithEmail } from "@/lib/actions/auth.actions";
+import { signUpWithEmail } from "@/lib/actions/auth.actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -31,7 +31,7 @@ const SignUp = () => {
         mode: 'onBlur'
     }, );
 
-    /*
+    
     const onSubmit = async (data: SignUpFormData) => {
         try {
             const result = await signUpWithEmail(data);
@@ -43,13 +43,8 @@ const SignUp = () => {
             })
         }
     }
-    */
     
-    // A placeholder submit handler so handleSubmit doesn't complain
-    const onSubmit = (data: SignUpFormData) => {
-        console.log("Form would be submitted with:", data);
-        toast.info("Sign up logic is currently disabled.");
-    }
+
 
     return (
         <>
