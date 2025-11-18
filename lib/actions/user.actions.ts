@@ -1,0 +1,34 @@
+'use server';
+
+import {connectToDatabase} from "@/database/mongoose";
+
+// 1. Define and export the type
+export type UserForNewsEmail = {
+  id: string;
+  email: string;
+  name: string;
+}
+
+// 2. (Recommended) Type the function's return value
+export const getAllUsersForNewsEmail = async (): Promise<UserForNewsEmail[]> => {
+  try {
+    const mongoose = await connectToDatabase();
+    const db = mongoose.connection.db;
+    if(!db) throw new Error('Mongoose connection not connected');
+
+    const users = await db.collection('user').find(
+      { email: { $exists: true, $ne: null }},
+      { projection: { _id: 1, id: 1, email: 1, name: 1, country:1 }}
+    ).toArray();
+
+    // 3. This map now correctly matches the UserForNewsEmail type
+    return users.filter((user) => user.email && user.name).map((user) => ({
+      id: user.id || user._id?.toString() || '',
+      email: user.email,
+      name: user.name
+    }))
+  } catch (e) {
+    console.error('Error fetching users for news email:', e)
+    return []
+  }
+}

@@ -1,7 +1,7 @@
 import {inngest} from "@/lib/inngest/client";
 import {NEWS_SUMMARY_EMAIL_PROMPT, PERSONALIZED_WELCOME_EMAIL_PROMPT} from "@/lib/inngest/prompts";
 import {sendNewsSummaryEmail, sendWelcomeEmail} from "@/lib/nodemailer";
-import {getAllUsersForNewsEmail} from "@/lib/actions/user.actions";
+import {getAllUsersForNewsEmail,UserForNewsEmail} from "@/lib/actions/user.actions";
 import { getWatchlistSymbolsByEmail } from "@/lib/actions/watchlist.actions";
 import { getNews } from "@/lib/actions/finnhub.actions";
 import { getFormattedTodayDate } from "@/lib/utils";
@@ -88,7 +88,7 @@ export const sendDailyNewsSummary = inngest.createFunction(
                     const prompt = NEWS_SUMMARY_EMAIL_PROMPT.replace('{{newsData}}', JSON.stringify(articles, null, 2));
 
                     const response = await step.ai.infer(`summarize-news-${user.email}`, {
-                        model: step.ai.models.gemini({ model: 'gemini-2.5-flash-lite' }),
+                        model: step.ai.models.gemini({ model: 'gemini-2.5-pro' }),
                         body: {
                             contents: [{ role: 'user', parts: [{ text:prompt }]}]
                         }
