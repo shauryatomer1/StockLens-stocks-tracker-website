@@ -10,11 +10,22 @@ export const sendSignUpEmail = inngest.createFunction(
     { id: 'sign-up-email' },
     { event: 'app/user.created'},
     async ({ event, step }) => {
+        // 1. Debug Log: See exactly what data is coming in
+        console.log("DEBUG - Event Data Received:", JSON.stringify(event.data, null, 2));
+
+        const { email, name } = event.data;
+
+        // 2. Guard Clause: Stop execution if email is missing
+        if (!email) {
+            console.error("CRITICAL: No email found in 'app/user.created' event data.");
+            return { success: false, message: "Skipped: Missing email address" };
+        }
+
         const userProfile = `
-            - Country: ${event.data.country}
-            - Investment goals: ${event.data.investmentGoals}
-            - Risk tolerance: ${event.data.riskTolerance}
-            - Preferred industry: ${event.data.preferredIndustry}
+            - Country: ${event.data.country || 'Not specified'}
+            - Investment goals: ${event.data.investmentGoals || 'Not specified'}
+            - Risk tolerance: ${event.data.riskTolerance || 'Not specified'}
+            - Preferred industry: ${event.data.preferredIndustry || 'Not specified'}
         `
 
         const prompt = PERSONALIZED_WELCOME_EMAIL_PROMPT.replace('{{userProfile}}', userProfile)
@@ -36,8 +47,7 @@ export const sendSignUpEmail = inngest.createFunction(
             const part = response.candidates?.[0]?.content?.parts?.[0];
             const introText = (part && 'text' in part ? part.text : null) ||'Thanks for joining Signalist. You now have the tools to track markets and make smarter moves.'
 
-            const { data: { email, name } } = event;
-
+            // We use the variables extracted at the top of the function
             return await sendWelcomeEmail({ email, name, intro: introText });
         })
 

@@ -1,15 +1,15 @@
 'use client';
 
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import {useForm} from "react-hook-form";
+import {Button} from "@/components/ui/button";
 import InputField from "@/components/forms/InputField";
 import SelectField from "@/components/forms/SelectField";
-import { INVESTMENT_GOALS, PREFERRED_INDUSTRIES, RISK_TOLERANCE_OPTIONS } from "@/lib/constants";
-import { CountrySelectField } from "@/components/forms/CountrySelectField";
+import {INVESTMENT_GOALS, PREFERRED_INDUSTRIES, RISK_TOLERANCE_OPTIONS} from "@/lib/constants";
+import {CountrySelectField} from "@/components/forms/CountrySelectField";
 import FooterLink from "@/components/forms/FooterLink";
-import { signUpWithEmail } from "@/lib/actions/auth.actions";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import {signUpWithEmail} from "@/lib/actions/auth.actions";
+import {useRouter} from "next/navigation";
+import {toast} from "sonner";
 
 const SignUp = () => {
     const router = useRouter()
@@ -31,7 +31,6 @@ const SignUp = () => {
         mode: 'onBlur'
     }, );
 
-    
     const onSubmit = async (data: SignUpFormData) => {
         try {
             const result = await signUpWithEmail(data);
@@ -43,19 +42,16 @@ const SignUp = () => {
             })
         }
     }
-    
-
 
     return (
         <>
             <h1 className="form-title">Sign Up & Personalize</h1>
 
-            {/* <form onSubmit={handleSubmit(onSubmit)} className="space-y-5"> */}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <InputField
                     name="fullName"
                     label="Full Name"
-                    placeholder="Shaurya Tomer"
+                    placeholder="John Doe"
                     register={register}
                     error={errors.fullName}
                     validation={{ required: 'Full name is required', minLength: 2 }}
@@ -64,7 +60,7 @@ const SignUp = () => {
                 <InputField
                     name="email"
                     label="Email"
-                    placeholder="contact@_shauryatomar1@gmail.com"
+                    placeholder="contact@jsmastery.com"
                     register={register}
                     error={errors.email}
                     validation={{ required: 'Email name is required', pattern: /^\w+@\w+\.\w+$/, message: 'Email address is required' }}
@@ -118,10 +114,6 @@ const SignUp = () => {
                     required
                 />
 
-                {/* <Button type="submit" disabled={isSubmitting} className="yellow-btn w-full mt-5">
-                    {isSubmitting ? 'Creating Account' : 'Start Your Investing Journey'}
-                </Button> */}
-                
                 <Button type="submit" disabled={isSubmitting} className="yellow-btn w-full mt-5">
                     {isSubmitting ? 'Creating Account' : 'Start Your Investing Journey'}
                 </Button>

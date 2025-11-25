@@ -1,34 +1,60 @@
+// lib/better-auth/auth.ts
 import { betterAuth } from "better-auth";
-import { mongodbAdapter} from "better-auth/adapters/mongodb";
-import { connectToDatabase} from "@/database/mongoose";
-import { nextCookies} from "better-auth/next-js";
+import { mongodbAdapter } from "better-auth/adapters/mongodb";
+import { MongoClient } from "mongodb";
+import { nextCookies } from "better-auth/next-js";
 
-let authInstance: ReturnType<typeof betterAuth> | null = null;
+/**
+ * IMPORTANT:
+ * - After changing this file, fully restart your dev server so the new config is loaded.
+ * - Ensure MONGODB_URI and BETTER_AUTH_SECRET are set in your environment.
+ */
 
-export const getAuth = async () => {
-    if(authInstance) return authInstance;
+const client = new MongoClient(process.env.MONGODB_URI!);
 
-    const mongoose = await connectToDatabase();
-    const db = mongoose.connection.db;
+/**
+ * Export a single `auth` instance used across the app.
+ * The critical fix: enable email/password sign-up explicitly.
+ */
+export const auth = betterAuth({
+  // Pass a DB instance. This is the recommended shape for the mongodb adapter.
+  // Replace "test" with your actual DB name if needed.
+  database: mongodbAdapter(client.db("test")),
 
-    if(!db) throw new Error('MongoDB connection not found');
+  // Secret used by Better Auth — ensure this is set in env
+  secret: process.env.BETTER_AUTH_SECRET,
 
-    authInstance = betterAuth({
-        database: mongodbAdapter(db as any),
-        secret: process.env.BETTER_AUTH_SECRET,
-        baseURL: process.env.BETTER_AUTH_URL,
-        emailAndPassword: {
-            enabled: true,
-            disableSignUp: false,
-            requireEmailVerification: false,
-            minPasswordLength: 8,
-            maxPasswordLength: 128,
-            autoSignIn: true,
-        },
-        plugins: [nextCookies()],
-    });
+  /**
+   * ====== Enable Email + Password Authentication ======
+   * `enabled: true` allows the feature.
+   * `disableSignUp: false` explicitly allows sign-ups.
+   * `requireEmailVerification` can be toggled as needed.
+   */
+  emailAndPassword: {
+    enabled: true,
+    disableSignUp: false,
+    requireEmailVerification: false,
+    // optional:
+    // minPasswordLength: 8,
+    // maxPasswordLength: 128,
+  },
 
-    return authInstance;
-}
+  // Custom user fields you want to store
+  user: {
+    additionalFields: {
+      country: { type: "string" },
+      investmentGoals: { type: "string" },
+      riskTolerance: { type: "string" },
+      preferredIndustry: { type: "string" },
+    },
+  },
 
-export const auth = await getAuth();
+  // Any Better Auth plugins you use (e.g. nextCookies for Next.js)
+  plugins: [nextCookies()],
+});
+
+/* Debugging helper (temporary)
+   Uncomment while debugging to confirm the runtime config is loaded.
+   Remove or comment out in production.
+*/
+// console.log("BetterAuth: emailAndPassword enabled =", auth?.options?.emailAndPassword?.enabled);
