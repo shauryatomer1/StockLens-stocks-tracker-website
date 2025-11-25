@@ -1,44 +1,84 @@
 import nodemailer from 'nodemailer';
-import {WELCOME_EMAIL_TEMPLATE, NEWS_SUMMARY_EMAIL_TEMPLATE} from "@/lib/nodemailer/templates";
+import { WELCOME_EMAIL_TEMPLATE, NEWS_SUMMARY_EMAIL_TEMPLATE } from "@/lib/nodemailer/templates";
 
-export const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.NODEMAILER_EMAIL!,
-        pass: process.env.NODEMAILER_PASSWORD!,
-    }
-})
+const SENDER_WELCOME = `"StockLens" <stocklens@shauryatomer@gmail.com>`;
+const SENDER_NEWS = `"StockLens News" <stocklens@shauryatomer@gmail.com>`;
 
-export const sendWelcomeEmail = async ({ email, name, intro }: WelcomeEmailData) => {
-    const htmlTemplate = WELCOME_EMAIL_TEMPLATE
-        .replace('{{name}}', name)
-        .replace('{{intro}}', intro);
-
-    const mailOptions = {
-        from: `"StockLens" <stocklens@shauryatomer@gmail.com>`,
-        to: email,
-        subject: `Welcome to StockLens - your stock market toolkit is ready!`,
-        text: 'Thanks for joining StockLens',
-        html: htmlTemplate,
-    }
-
-    await transporter.sendMail(mailOptions);
+if (!process.env.NODEMAILER_EMAIL || !process.env.NODEMAILER_PASSWORD) {
+  console.warn('[nodemailer] NODEMAILER_EMAIL or NODEMAILER_PASSWORD is not set. Emails will fail if you try to send them.');
 }
 
+export const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.NODEMAILER_EMAIL!,
+    pass: process.env.NODEMAILER_PASSWORD!,
+  },
+});
+
+// helper to validate email
+function isValidEmail(e: any): e is string {
+  return typeof e === 'string' && e.trim().length > 0;
+}
+
+export const sendWelcomeEmail = async ({ email, name, intro }: WelcomeEmailData) => {
+  if (!isValidEmail(email)) {
+    console.error('[sendWelcomeEmail] Missing/invalid recipient email:', email);
+    throw new Error('sendWelcomeEmail called without a valid email');
+  }
+
+  const safeName = typeof name === 'string' && name.trim() !== '' ? name : 'there';
+  const safeIntro = typeof intro === 'string' ? intro : 'Thanks for joining Signalist. You now have the tools to track markets and make smarter moves.';
+
+  const htmlTemplate = (WELCOME_EMAIL_TEMPLATE || '')
+    .replace('{{name}}', safeName)
+    .replace('{{intro}}', safeIntro);
+
+  const mailOptions = {
+    from: SENDER_WELCOME,
+    to: email,
+    subject: `Welcome to StockLens - your stock market toolkit is ready!`,
+    text: 'Thanks for joining StockLens',
+    html: htmlTemplate,
+  };
+
+  try {
+    const res = await transporter.sendMail(mailOptions);
+    console.log('[sendWelcomeEmail] Email sent', { to: email, messageId: res?.messageId });
+  } catch (err) {
+    console.error('[sendWelcomeEmail] Failed to send email to', email, err);
+    throw err;
+  }
+};
+
 export const sendNewsSummaryEmail = async (
-    { email, date, newsContent }: { email: string; date: string; newsContent: string }
+  { email, date, newsContent }: { email: string; date: string; newsContent: string }
 ): Promise<void> => {
-    const htmlTemplate = NEWS_SUMMARY_EMAIL_TEMPLATE
-        .replace('{{date}}', date)
-        .replace('{{newsContent}}', newsContent);
+  if (!isValidEmail(email)) {
+    console.error('[sendNewsSummaryEmail] Missing/invalid recipient email:', email);
+    throw new Error('sendNewsSummaryEmail called without a valid email');
+  }
 
-    const mailOptions = {
-        from: `"StockLens News" <stocklens@shauryatomer@gmail.com>`,
-        to: email,
-        subject: `📈 Market News Summary Today - ${date}`,
-        text: `Today's market news summary from StockLens`,
-        html: htmlTemplate,
-    };
+  const safeDate = typeof date === 'string' ? date : '';
+  const safeNewsContent = typeof newsContent === 'string' ? newsContent : 'No market news.';
 
-    await transporter.sendMail(mailOptions);
+  const htmlTemplate = (NEWS_SUMMARY_EMAIL_TEMPLATE || '')
+    .replace('{{date}}', safeDate)
+    .replace('{{newsContent}}', safeNewsContent);
+
+  const mailOptions = {
+    from: SENDER_NEWS,
+    to: email,
+    subject: `📈 Market News Summary Today - ${safeDate}`,
+    text: `Today's market news summary from StockLens`,
+    html: htmlTemplate,
+  };
+
+  try {
+    const res = await transporter.sendMail(mailOptions);
+    console.log('[sendNewsSummaryEmail] Email sent', { to: email, messageId: res?.messageId });
+  } catch (err) {
+    console.error('[sendNewsSummaryEmail] Failed to send news email to', email, err);
+    throw err;
+  }
 };
