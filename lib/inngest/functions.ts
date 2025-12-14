@@ -1,14 +1,15 @@
-import {inngest} from "@/lib/inngest/client";
-import {NEWS_SUMMARY_EMAIL_PROMPT, PERSONALIZED_WELCOME_EMAIL_PROMPT} from "@/lib/inngest/prompts";
-import {sendNewsSummaryEmail, sendWelcomeEmail} from "@/lib/nodemailer";
-import {getAllUsersForNewsEmail,UserForNewsEmail} from "@/lib/actions/user.actions";
+import { inngest } from "@/lib/inngest/client";
+import { redis } from "@/lib/redis";
+import { NEWS_SUMMARY_EMAIL_PROMPT, PERSONALIZED_WELCOME_EMAIL_PROMPT } from "@/lib/inngest/prompts";
+import { sendNewsSummaryEmail, sendWelcomeEmail } from "@/lib/nodemailer";
+import { getAllUsersForNewsEmail, UserForNewsEmail } from "@/lib/actions/user.actions";
 import { getWatchlistSymbolsByEmail } from "@/lib/actions/watchlist.actions";
 import { getNews } from "@/lib/actions/finnhub.actions";
 import { getFormattedTodayDate } from "@/lib/utils";
 
 export const sendSignUpEmail = inngest.createFunction(
     { id: 'sign-up-email' },
-    { event: 'app/user.created'},
+    { event: 'app/user.created' },
     async ({ event, step }) => {
         // 1. Debug Log: See exactly what data is coming in
         console.log("DEBUG - Event Data Received:", JSON.stringify(event.data, null, 2));
@@ -31,7 +32,7 @@ export const sendSignUpEmail = inngest.createFunction(
         const prompt = PERSONALIZED_WELCOME_EMAIL_PROMPT.replace('{{userProfile}}', userProfile)
 
         const response = await step.ai.infer('generate-welcome-intro', {
-            model: step.ai.models.gemini({ model: 'gemini-2.5-pro' }),
+            model: step.ai.models.gemini({ model: 'gemini-2.5-flash' }),
             body: {
                 contents: [
                     {
@@ -45,7 +46,7 @@ export const sendSignUpEmail = inngest.createFunction(
 
         await step.run('send-welcome-email', async () => {
             const part = response.candidates?.[0]?.content?.parts?.[0];
-            const introText = (part && 'text' in part ? part.text : null) ||'Thanks for joining Signalist. You now have the tools to track markets and make smarter moves.'
+            const introText = (part && 'text' in part ? part.text : null) || 'Thanks for joining Signalist. You now have the tools to track markets and make smarter moves.'
 
             // We use the variables extracted at the top of the function
             return await sendWelcomeEmail({ email, name, intro: introText });
@@ -58,14 +59,14 @@ export const sendSignUpEmail = inngest.createFunction(
     }
 )
 
-export const sendDailyNewsSummary = inngest.createFunction(
-    { id: 'daily-news-summary' },
-    [ { event: 'app/send.daily.news' }, { cron: '0 12 * * *' } ],
+export const sendMarketNewsSummary = inngest.createFunction(
+    { id: 'market-news-summary' },
+    [{ event: 'app/send.market.news' }, { cron: '0 7 * * *' }],
     async ({ step }) => {
         // Step #1: Get all users for news delivery
         const users = await step.run('get-all-users', getAllUsersForNewsEmail)
 
-        if(!users || users.length === 0) return { success: false, message: 'No users found for news email' };
+        if (!users || users.length === 0) return { success: false, message: 'No users found for news email' };
 
         // Step #2: For each user, get watchlist symbols -> fetch news (fallback to general)
         const results = await step.run('fetch-user-news', async () => {
@@ -94,37 +95,56 @@ export const sendDailyNewsSummary = inngest.createFunction(
         const userNewsSummaries: { user: UserForNewsEmail; newsContent: string | null }[] = [];
 
         for (const { user, articles } of results) {
-                try {
-                    const prompt = NEWS_SUMMARY_EMAIL_PROMPT.replace('{{newsData}}', JSON.stringify(articles, null, 2));
+            try {
+                const prompt = NEWS_SUMMARY_EMAIL_PROMPT.replace('{{newsData}}', JSON.stringify(articles, null, 2));
 
-                    const response = await step.ai.infer(`summarize-news-${user.email}`, {
-                        model: step.ai.models.gemini({ model: 'gemini-2.5-pro' }),
-                        body: {
-                            contents: [{ role: 'user', parts: [{ text:prompt }]}]
-                        }
-                    });
+                const response = await step.ai.infer(`summarize-news-${user.email}`, {
+                    model: step.ai.models.gemini({ model: 'gemini-2.5-flash' }),
+                    body: {
+                        contents: [{ role: 'user', parts: [{ text: prompt }] }]
+                    }
+                });
 
-                    const part = response.candidates?.[0]?.content?.parts?.[0];
-                    const newsContent = (part && 'text' in part ? part.text : null) || 'No market news.'
+                const part = response.candidates?.[0]?.content?.parts?.[0];
+                const newsContent = (part && 'text' in part ? part.text : null) || 'No market news.'
 
-                    userNewsSummaries.push({ user, newsContent });
-                } catch (e) {
-                    console.error('Failed to summarize news for : ', user.email);
-                    userNewsSummaries.push({ user, newsContent: null });
-                }
+                userNewsSummaries.push({ user, newsContent });
+            } catch {
+                console.error('Failed to summarize news for : ', user.email);
+                userNewsSummaries.push({ user, newsContent: null });
             }
+
+
+            // Rate limiting using Redis
+            await step.run('rate-limit-check', async () => {
+                const key = `rate-limit:gemini:${new Date().getMinutes()}`;
+                const count = await redis.incr(key);
+                if (count === 1) {
+                    await redis.expire(key, 60);
+                }
+
+                // If we've exceeded 15 calls in the current minute, wait a bit
+                // This is a simple cooperative rate limiting
+                if (count > 15) {
+                    await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5s extra if congested
+                }
+            });
+
+            // Keep a small baseline delay to be safe, but reduced from 10s
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
 
         // Step #4: (placeholder) Send the emails
         await step.run('send-news-emails', async () => {
-                await Promise.all(
-                    userNewsSummaries.map(async ({ user, newsContent}) => {
-                        if(!newsContent) return false;
+            await Promise.all(
+                userNewsSummaries.map(async ({ user, newsContent }) => {
+                    if (!newsContent) return false;
 
-                        return await sendNewsSummaryEmail({ email: user.email, date: getFormattedTodayDate(), newsContent })
-                    })
-                )
-            })
+                    return await sendNewsSummaryEmail({ email: user.email, date: getFormattedTodayDate(), newsContent })
+                })
+            )
+        })
 
-        return { success: true, message: 'Daily news summary emails sent successfully' }
+        return { success: true, message: 'Market news summary emails sent successfully' }
     }
 )

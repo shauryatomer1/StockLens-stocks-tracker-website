@@ -19,8 +19,9 @@ export type SignInFormData = {
   password: string;
 };
 
-type SuccessResult = { success: true; data: any };
+type SuccessResult = { success: true; data: unknown };
 type ErrorResult = { success: false; error: string; code?: string };
+interface APIError { body?: { message?: string } };
 export type SignUpResult = SuccessResult | ErrorResult;
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -42,30 +43,29 @@ export const signUpWithEmail = async (
 
   try {
     const response = await auth.api.signUpEmail({
-    body: {
+      body: {
         email,
         password,
         // Fix: Use || "" to ensure it is never undefined
-        name: fullName || "", 
+        name: fullName || "",
         country: country || "",
         investmentGoals: investmentGoals || "",
         riskTolerance: riskTolerance || "",
         preferredIndustry: preferredIndustry || "",
-    },
-    headers: await headers(),
-});
+      },
+      headers: await headers(),
+    });
 
     if (!response) {
       return { success: false, error: 'Empty response from auth provider', code: 'EMPTY_RESPONSE' };
     }
 
-    if ((response as any).error) {
-      const msg = (response as any).error?.message ?? 'Sign up failed';
+    if ((response as unknown as { error: unknown }).error) {
+      const msg = (response as unknown as { error: { message: string } }).error?.message ?? 'Sign up failed';
       return { success: false, error: msg, code: 'AUTH_ERROR' };
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       void inngest.send({
         name: 'app/user.created',
         data: {
@@ -77,7 +77,7 @@ export const signUpWithEmail = async (
           preferredIndustry,
           createdAt: new Date().toISOString(),
         },
-      }).catch((evErr: any) => {
+      }).catch((evErr: unknown) => {
         console.error('inngest send failed:', evErr);
       });
     } catch (evtErr) {
@@ -85,10 +85,22 @@ export const signUpWithEmail = async (
     }
 
     return { success: true, data: response };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('signUpWithEmail error:', err);
-    const message = err?.message ?? 'Sign up failed';
-    const code = err?.code ?? 'SIGNUP_EXCEPTION';
+    let message = (err as Error)?.message ?? 'Sign up failed';
+    const code = (err as { code?: string })?.code ?? 'SIGNUP_EXCEPTION';
+
+    // Better Auth specific error handling (if error object has explicit status or message)
+    if (message.includes('already exists') || message.includes('Unique constraint failed')) {
+      message = 'User with this email already exists';
+    }
+
+    // Attempt to extract message from deeper error object if present logic was flawed
+    // Attempt to extract message from deeper error object if present logic was flawed
+    if ((err as APIError)?.body?.message) {
+      message = (err as APIError).body?.message || message;
+    }
+
     return { success: false, error: message, code };
   }
 };

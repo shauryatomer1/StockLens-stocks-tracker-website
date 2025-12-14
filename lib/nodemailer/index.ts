@@ -17,7 +17,7 @@ export const transporter = nodemailer.createTransport({
 });
 
 // helper to validate email
-function isValidEmail(e: any): e is string {
+function isValidEmail(e: unknown): e is string {
   return typeof e === 'string' && e.trim().length > 0;
 }
 
@@ -28,7 +28,7 @@ export const sendWelcomeEmail = async ({ email, name, intro }: WelcomeEmailData)
   }
 
   const safeName = typeof name === 'string' && name.trim() !== '' ? name : 'there';
-  const safeIntro = typeof intro === 'string' ? intro : 'Thanks for joining Signalist. You now have the tools to track markets and make smarter moves.';
+  const safeIntro = typeof intro === 'string' ? intro : 'Thanks for joining StockLens. You now have the tools to track markets and make smarter moves.';
 
   const htmlTemplate = (WELCOME_EMAIL_TEMPLATE || '')
     .replace('{{name}}', safeName)
