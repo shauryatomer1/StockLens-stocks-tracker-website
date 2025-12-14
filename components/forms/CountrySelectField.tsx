@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Control, Controller, FieldError } from 'react-hook-form';
+import { Control, Controller, FieldError, FieldValues, Path } from 'react-hook-form';
 import {
     Popover,
     PopoverContent,
@@ -21,18 +21,18 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import countryList from 'react-select-country-list';
 
-type CountrySelectProps = {
-    name: string;
+type CountrySelectProps<T extends FieldValues> = {
+    name: Path<T>;
     label: string;
-    control: Control<any>;
+    control: Control<T>;
     error?: FieldError;
     required?: boolean;
 };
 
 const CountrySelect = ({
-                                value,
-                                onChange,
-                            }: {
+    value,
+    onChange,
+}: {
     value: string;
     onChange: (value: string) => void;
 }) => {
@@ -112,13 +112,13 @@ const CountrySelect = ({
     );
 };
 
-export const CountrySelectField = ({
-                                            name,
-                                            label,
-                                            control,
-                                            error,
-                                            required = false,
-                                        }: CountrySelectProps) => {
+export const CountrySelectField = <T extends FieldValues>({
+    name,
+    label,
+    control,
+    error,
+    required = false,
+}: CountrySelectProps<T>) => {
     return (
         <div className='space-y-2'>
             <Label htmlFor={name} className='form-label'>

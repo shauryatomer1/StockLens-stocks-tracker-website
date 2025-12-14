@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import {
   DropdownMenu,
@@ -7,30 +7,37 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
-import NavItems from "./NavItems";
+import NavItems from "@/components/NavItems";
+import { signOut } from "@/lib/actions/auth.actions";
+import type { StockWithWatchlistStatus } from "@/lib/types";
 
-const UserDropdown = () => {
+interface UserDropdownProps {
+  user: { name: string; email: string };
+  initialStocks: StockWithWatchlistStatus[];
+}
+
+const UserDropdown = ({ user, initialStocks }: UserDropdownProps) => {
   const router = useRouter();
 
   const handleSignOut = async () => {
+    await signOut();
     router.push("/sign-in");
-  }
-
-  const user = { name: "John Doe", email: "contact@testme.com" };
+  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="flex items-center gap-3 text-gray-4 hover:text-yellow-600">
+        <Button
+          variant="ghost"
+          className="flex items-center gap-3 text-gray-4 hover:text-yellow-500"
+        >
           <Avatar className="h-8 w-8">
-            {/* Use a real image link or remove AvatarImage */}
-            <AvatarImage src="https://avatar.vercel.sh/johndoe" />
-            <AvatarFallback className="bg-yellow-500 text-yellow text-sm font-bold">
+            <AvatarFallback className="bg-yellow-500 text-yellow-900 text-sm font-bold">
               {user.name[0]}
             </AvatarFallback>
           </Avatar>
@@ -47,8 +54,7 @@ const UserDropdown = () => {
         <DropdownMenuLabel>
           <div className="flex relative items-center gap-3 py-2">
             <Avatar className="h-10 w-10">
-              <AvatarImage src="https://avatar.vercel.sh/johndoe" />
-              <AvatarFallback className="bg-yellow-500 text-yellow text-sm font-bold">
+              <AvatarFallback className="bg-yellow-500 text-yellow-900 text-sm font-bold">
                 {user.name[0]}
               </AvatarFallback>
             </Avatar>
@@ -57,32 +63,30 @@ const UserDropdown = () => {
               <span className="text-base font-medium text-gray-400">
                 {user.name}
               </span>
-              <span className="text-sm text-gray-500">
-                {user.email}
-              </span>
+              <span className="text-sm text-gray-500">{user.email}</span>
             </div>
           </div>
         </DropdownMenuLabel>
 
-        <DropdownMenuSeparator className="bg-gray-600"/>
+        <DropdownMenuSeparator className="bg-gray-600" />
 
         <DropdownMenuItem
-          onSelect={handleSignOut}
+          onClick={handleSignOut}
           className="text-gray-100 text-md font-medium focus:bg-transparent focus:text-yellow-500 transition-colors cursor-pointer"
         >
-          <LogOut className="mr-2 h-4 w-4 hidden sm:block" />
+          <LogOut className="h-4 w-4 mr-2 hidden sm:block" />
           Logout
         </DropdownMenuItem>
 
         <DropdownMenuSeparator className="hidden sm:block bg-gray-600" />
 
-        {/* Mobile Menu Nav */}
+        {/* Mobile nav only */}
         <nav className="sm:hidden">
-          <NavItems initialStocks={[]} />
+          <NavItems initialStocks={initialStocks} />
         </nav>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
-}
+  );
+};
 
-export default UserDropdown
+export default UserDropdown;

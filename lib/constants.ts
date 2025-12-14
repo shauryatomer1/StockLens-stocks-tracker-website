@@ -1,7 +1,8 @@
 export const NAV_ITEMS = [
     { href: '/', label: 'Dashboard' },
     { href: '/search', label: 'Search' },
-    // { href: '/watchlist', label: 'Watchlist' },
+    { href: '/watchlist', label: 'Watchlist' },
+    { href: '/portfolio', label: 'Portfolio' },
 ];
 
 // Sign-up form select options
@@ -334,6 +335,10 @@ export const WATCHLIST_TABLE_HEADER = [
     'Change',
     'Market Cap',
     'P/E Ratio',
-    'Alert',
+    'Details',
     'Action',
 ];
+export const FINNHUB_BASE_URL = 'https://finnhub.io/api/v1';
+
+
+
