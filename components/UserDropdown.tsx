@@ -11,10 +11,11 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, Loader2 } from "lucide-react";
 import NavItems from "@/components/NavItems";
 import { signOut } from "@/lib/actions/auth.actions";
 import type { StockWithWatchlistStatus } from "@/lib/types";
+import { useState } from "react";
 
 interface UserDropdownProps {
   user: User;
@@ -23,8 +24,12 @@ interface UserDropdownProps {
 
 const UserDropdown = ({ user, initialStocks }: UserDropdownProps) => {
   const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const handleSignOut = async () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSignOut = async (e: any) => {
+    e.preventDefault();
+    setIsLoggingOut(true);
     await signOut();
     router.push("/sign-in");
   };
@@ -103,11 +108,16 @@ const UserDropdown = ({ user, initialStocks }: UserDropdownProps) => {
         <DropdownMenuSeparator className="bg-gray-600" />
 
         <DropdownMenuItem
-          onClick={handleSignOut}
+          onSelect={handleSignOut}
           className="text-gray-100 text-md font-medium focus:bg-transparent focus:text-yellow-500 transition-colors cursor-pointer"
+          disabled={isLoggingOut}
         >
-          <LogOut className="h-4 w-4 mr-2 hidden sm:block" />
-          Logout
+          {isLoggingOut ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <LogOut className="h-4 w-4 mr-2 hidden sm:block" />
+          )}
+          {isLoggingOut ? "Logging out..." : "Logout"}
         </DropdownMenuItem>
 
         <DropdownMenuSeparator className="hidden sm:block bg-gray-600" />

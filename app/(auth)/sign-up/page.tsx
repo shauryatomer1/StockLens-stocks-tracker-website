@@ -118,8 +118,8 @@ const SignUp = () => {
                     required
                 />
 
-                <Button type="submit" disabled={isSubmitting} className="yellow-btn w-full mt-5">
-                    {isSubmitting ? 'Creating Account' : 'Start Your Investing Journey'}
+                <Button type="submit" isLoading={isSubmitting} className="yellow-btn w-full mt-5">
+                    Start Your Investing Journey
                 </Button>
 
                 <FooterLink text="Already have an account?" linkText="Sign in" href="/sign-in" />
