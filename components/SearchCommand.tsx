@@ -24,9 +24,11 @@ export default function SearchCommand({
   const [loading, setLoading] = useState(false);
   const [stocks, setStocks] =
     useState<StockWithWatchlistStatus[]>(initialStocks);
+  // Maintain a local copy of "all/initial" stocks to fallback to when search is cleared
+  const [allStocks, setAllStocks] = useState<StockWithWatchlistStatus[]>(initialStocks);
 
   const isSearchMode = !!searchTerm.trim();
-  const displayStocks = isSearchMode ? stocks : stocks?.slice(0, 10);
+  const displayStocks = isSearchMode ? stocks : allStocks?.slice(0, 10);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -40,7 +42,7 @@ export default function SearchCommand({
   }, []);
 
   const handleSearch = async () => {
-    if (!isSearchMode) return setStocks(initialStocks);
+    if (!isSearchMode) return setStocks(allStocks);
 
     setLoading(true);
     try {
@@ -62,14 +64,21 @@ export default function SearchCommand({
   const handleSelectStock = () => {
     setOpen(false);
     setSearchTerm('');
-    setStocks(initialStocks);
+    setStocks(allStocks);
   };
 
   // Handle watchlist changes status change
   const handleWatchlistChange = async (symbol: string, isAdded: boolean) => {
-    // Update current stocks
+    // Update current stocks view
     setStocks((prevStocks) =>
       prevStocks?.map((stock) =>
+        stock.symbol === symbol ? { ...stock, isInWatchlist: isAdded } : stock
+      ) || []
+    );
+
+    // Update local fallback list so changes persist when search clears
+    setAllStocks((prev) =>
+      prev?.map((stock) =>
         stock.symbol === symbol ? { ...stock, isInWatchlist: isAdded } : stock
       ) || []
     );

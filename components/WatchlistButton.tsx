@@ -49,7 +49,7 @@ const WatchlistButton = ({
       });
 
       // Notify parent component of watchlist change for state synchronization
-      onWatchlistChange?.(symbol, !added);
+      onWatchlistChange?.(symbol, shouldAdd);
     }
   };
 
