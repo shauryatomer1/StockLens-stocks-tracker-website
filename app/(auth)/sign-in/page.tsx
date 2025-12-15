@@ -51,7 +51,13 @@ const SignIn = () => {
                     placeholder="Enter your email"
                     register={register}
                     error={errors.email}
-                    validation={{ required: 'Email is required', pattern: /^\w+@\w+\.\w+$/ }}
+                    validation={{
+                        required: 'Email is required',
+                        pattern: {
+                            value: /^\w+@\w+\.\w+$/,
+                            message: 'enter valid email'
+                        }
+                    }}
                 />
 
                 <InputField
@@ -61,7 +67,13 @@ const SignIn = () => {
                     type="password"
                     register={register}
                     error={errors.password}
-                    validation={{ required: 'Password is required', minLength: 8 }}
+                    validation={{
+                        required: 'Password is required',
+                        minLength: {
+                            value: 8,
+                            message: 'password must have at least 8 digits'
+                        }
+                    }}
                 />
 
                 <Button type="submit" isLoading={isSubmitting} className="yellow-btn w-full mt-5">
