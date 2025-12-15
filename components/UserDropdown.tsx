@@ -17,7 +17,7 @@ import { signOut } from "@/lib/actions/auth.actions";
 import type { StockWithWatchlistStatus } from "@/lib/types";
 
 interface UserDropdownProps {
-  user: { name: string; email: string };
+  user: User;
   initialStocks: StockWithWatchlistStatus[];
 }
 
@@ -67,6 +67,38 @@ const UserDropdown = ({ user, initialStocks }: UserDropdownProps) => {
             </div>
           </div>
         </DropdownMenuLabel>
+
+        {user.investmentGoals && (
+          <>
+            <DropdownMenuSeparator className="bg-gray-600" />
+            <div className="px-2 py-2 text-sm text-gray-400 space-y-2">
+              <div className="flex flex-col">
+                <span className="text-gray-500 text-xs uppercase font-semibold">
+                  Investment Goals
+                </span>
+                <span className="text-gray-200">{user.investmentGoals}</span>
+              </div>
+
+              {user.riskTolerance && (
+                <div className="flex flex-col">
+                  <span className="text-gray-500 text-xs uppercase font-semibold">
+                    Risk Tolerance
+                  </span>
+                  <span className="text-gray-200">{user.riskTolerance}</span>
+                </div>
+              )}
+
+              {user.preferredIndustry && (
+                <div className="flex flex-col">
+                  <span className="text-gray-500 text-xs uppercase font-semibold">
+                    Preferred Industry
+                  </span>
+                  <span className="text-gray-200">{user.preferredIndustry}</span>
+                </div>
+              )}
+            </div>
+          </>
+        )}
 
         <DropdownMenuSeparator className="bg-gray-600" />
 
