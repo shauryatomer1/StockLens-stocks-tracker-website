@@ -8,8 +8,17 @@ interface PortfolioAnalysisProps {
     userId: string;
 }
 
+interface PortfolioAnalysisData {
+    summary: string;
+    riskLevel: string;
+    riskAnalysis: string;
+    composition: string;
+    diversification: string;
+    suggestions: string[];
+}
+
 export default function PortfolioAnalysis({ userId }: PortfolioAnalysisProps) {
-    const [analysis, setAnalysis] = useState<any>(null);
+    const [analysis, setAnalysis] = useState<PortfolioAnalysisData | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +32,7 @@ export default function PortfolioAnalysis({ userId }: PortfolioAnalysisProps) {
             } else {
                 setError(result.message || "Something went wrong");
             }
-        } catch (err) {
+        } catch {
             setError("Failed to connect to the server");
         } finally {
             setLoading(false);
