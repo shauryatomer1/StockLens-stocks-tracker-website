@@ -11,16 +11,16 @@ declare global {
 
 let cached = global.mongooseCache;
 
-if(!cached) {
+if (!cached) {
     cached = global.mongooseCache = { conn: null, promise: null };
 }
 
 export const connectToDatabase = async () => {
-    if(!MONGODB_URI) throw new Error('MONGODB_URI must be set within .env');
+    if (!MONGODB_URI) throw new Error('MONGODB_URI must be set within .env');
 
-    if(cached.conn) return cached.conn;
+    if (cached.conn) return cached.conn;
 
-    if(!cached.promise) {
+    if (!cached.promise) {
         cached.promise = mongoose.connect(MONGODB_URI, { bufferCommands: false });
     }
 
@@ -31,7 +31,7 @@ export const connectToDatabase = async () => {
         throw err;
     }
 
-    console.log(`Connected to database ${process.env.NODE_ENV} - ${MONGODB_URI}`);
+    console.log(`Connected to database ${process.env.NODE_ENV}`);
 
     return cached.conn;
 }
