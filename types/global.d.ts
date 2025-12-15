@@ -71,6 +71,9 @@ declare global {
         id: string;
         name: string;
         email: string;
+        investmentGoals?: string;
+        riskTolerance?: string;
+        preferredIndustry?: string;
     };
 
     type Stock = {
@@ -217,4 +220,4 @@ declare global {
     };
 }
 
-export {};
+export { };
