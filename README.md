@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/assets/images/logo.png" alt="StockLens Logo" width="100" />
+  
   <h1>StockLens</h1>
   <p>
     <strong>Intelligent Portfolio Tracker & Market Analysis Tool</strong>
