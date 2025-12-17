@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
+  <img src="public/assets/images/logo.png" alt="StockLens Logo" width="100" />
+  <h1>StockLens</h1>
+  <p>
+    <strong>Intelligent Portfolio Tracker & Market Analysis Tool</strong>
+  </p>
+  <p>
+    Powered by <strong>Next.js 16</strong>, <strong>AI</strong>, and Real-Time Data.
+  </p>
 
-## Getting Started
+  <p>
+    <a href="#features">Features</a> •
+    <a href="#tech-stack">Tech Stack</a> •
+    <a href="#getting-started">Getting Started</a> •
+    <a href="#deployment">Deployment</a>
+  </p>
 
-First, run the development server:
+  <img src="public/assets/images/dashboard.png" alt="StockLens Dashboard" width="100%" style="border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);" />
+</div>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+<br />
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 About The Project
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**StockLens** is a modern, full-stack financial application designed to give investors a clear edge. It combines real-time stock market data with advanced AI analysis to provide actionable insights into your portfolio.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Forget cluttered spreadsheets. StockLens offers a sleek, responsive interface to track your investments, analyze performance, and discover market trends instantly.
 
-## Learn More
+## ✨ Key Features
 
-To learn more about Next.js, take a look at the following resources:
+*   **📈 Real-Time Market Data**: Live stock prices, changes, and market caps powered by the Finnhub API.
+*   **🤖 AI-Powered Analysis**: Integrated **Google Gemini AI** to analyze your portfolio and give personalized investment advice.
+*   **💼 Portfolio Management**: Add, remove, and track your stock holdings with ease.
+*   **⭐ Smart Watchlist**: Keep an eye on potential investments with a synchronized watchlist.
+*   **⚡ specific Loading States**: Global progress bars and localized loading spinners for a smooth user experience.
+*   **🔐 Secure Authentication**: Robust sign-up and sign-in flow with email validation and password security policies.
+*   **🔄 Background Jobs**: Event-driven architecture using **Inngest** for reliable background tasks (e.g., user onboarding).
+*   **⚡ Fast Caching**: Redis integration for rate limiting and data caching.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Built with the latest web technologies for performance and scalability.
 
-## Deploy on Vercel
+*   **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
+*   **Language**: [TypeScript](https://www.typescriptlang.org/)
+*   **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+*   **Database**: [MongoDB / Mongoose](https://www.mongodb.com/)
+*   **Auth**: [Better-Auth](https://github.com/better-auth/better-auth)
+*   **Queue/Jobs**: [Inngest](https://www.inngest.com/)
+*   **Cache**: [Redis (Upstash / IOredis)](https://redis.io/)
+*   **AI**: [Google Gemini](https://deepmind.google/technologies/gemini/)
+*   **Market Data**: [Finnhub API](https://finnhub.io/)
+*   **Email**: [Nodemailer](https://nodemailer.com/)
+*   **Charts**: [TradingView Widgets](https://www.tradingview.com/widget/)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+---
+
+
