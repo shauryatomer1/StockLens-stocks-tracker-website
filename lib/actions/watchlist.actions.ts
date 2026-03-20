@@ -130,10 +130,15 @@ export const getWatchlistWithData = async () => {
 
     const stocksWithData = await Promise.all(
       watchlist.map(async (item: WatchlistItem) => {
-        const stockData = await getStocksDetails(item.symbol);
+        let stockData;
+        try {
+          stockData = await getStocksDetails(item.symbol);
+        } catch (err) {
+          console.warn(`Failed to fetch data for ${item.symbol}:`, err);
+        }
 
         if (!stockData) {
-          console.warn(`Failed to fetch data for ${item.symbol}`);
+          console.warn(`No stock data returned for ${item.symbol}`);
           return item; // fallback to raw item
         }
 

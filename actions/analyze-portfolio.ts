@@ -76,11 +76,16 @@ export async function analyzePortfolio(userId: string) {
 
 
 
-        const result = await model.generateContent(prompt);
+        const result = await model.generateContent({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: {
+                responseMimeType: "application/json",
+            }
+        });
         const response = await result.response;
         let text = response.text();
 
-        // Clean up markdown code blocks
+        // Safety cleanup just in case
         text = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
         // Validate JSON before caching
@@ -99,7 +104,7 @@ export async function analyzePortfolio(userId: string) {
         console.error("Error analyzing portfolio:", error);
         return {
             success: false,
-            message: "Failed to specific generate analysis. Please try again later.",
+            message: `Failed to generate analysis. Detail: ${error instanceof Error ? error.message : String(error)}`,
         };
     }
 }

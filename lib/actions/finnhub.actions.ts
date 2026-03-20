@@ -152,17 +152,26 @@ export const getStocksDetails = cache(async (symbol: string) => {
       fetchJSON(
         // Price data - minimal caching for accuracy
         `${FINNHUB_BASE_URL}/quote?symbol=${cleanSymbol}&token=${FINNHUB_TOKEN}`
-      ),
+      ).catch((e: Error) => {
+        console.warn(`Quote fetch failed for ${cleanSymbol}:`, e.message);
+        return null;
+      }),
       fetchJSON(
         // Company info - cache 1hr (rarely changes)
         `${FINNHUB_BASE_URL}/stock/profile2?symbol=${cleanSymbol}&token=${FINNHUB_TOKEN}`,
         3600
-      ),
+      ).catch((e: Error) => {
+        console.warn(`Profile fetch failed for ${cleanSymbol}:`, e.message);
+        return null;
+      }),
       fetchJSON(
         // Financial metrics (P/E, etc.) - cache 30min
         `${FINNHUB_BASE_URL}/stock/metric?symbol=${cleanSymbol}&metric=all&token=${FINNHUB_TOKEN}`,
         1800
-      ),
+      ).catch((e: Error) => {
+        console.warn(`Financials fetch failed for ${cleanSymbol}:`, e.message);
+        return null;
+      }),
     ]);
 
     const quoteData = quote as QuoteData;
